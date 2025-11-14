@@ -46,6 +46,7 @@ cd doctolib-practice
 npm init -y
 npm install express pg dotenv
 npm install -D @types/express @types/node @types/pg nodemon typescript
+npx tsc --init
 ```
 
 **Structure de base à créer :**
