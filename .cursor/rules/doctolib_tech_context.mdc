@@ -1,0 +1,303 @@
+---
+alwaysApply: true
+---
+
+## 🌍 Doctolib-Inspired Tech Context (Adapted to React + Node.js + PostgreSQL)
+
+### 🎯 Goal of this Rule
+
+- **Ground** all exercises and explanations in a **Doctolib-like environment**
+- **Adapt** the original Ruby on Rails monolith description to the interview stack:
+  - **Frontend**: React 18 + TypeScript
+  - **Backend**: Node.js + Express (TypeScript when possible)
+  - **Database**: PostgreSQL
+  - **Testing**: Jest (+ React Testing Library / Supertest)
+- **Preserve** Doctolib’s key principles: _simple but not simplistic_, _quality & testing first_, _healthcare & privacy aware_.
+
+---
+
+## 🏗 Real Doctolib Stack vs Practice Stack
+
+### Real Doctolib Stack (2025)
+
+- **Backend**:
+  - Historical **Ruby on Rails monolith** (core product)
+  - Ongoing migration to **Spring Boot + Kotlin/Java** microservices
+- **Frontend**: React + TypeScript (integrated in the Rails monolith)
+- **Mobile**: React Native, Swift, Kotlin
+- **Infrastructure**: PostgreSQL, Kubernetes, Docker, AWS, GitHub Actions
+
+### Practice Stack in This Repository
+
+- **Frontend**: React 18 + TypeScript
+- **Backend**: Node.js + Express (TypeScript preferred)
+- **Database**: PostgreSQL
+- **Testing**: Jest (+ React Testing Library / Supertest)
+
+### How to Use This in Interview
+
+- Clearly distinguish:
+  - “In production you use **Rails + Spring Boot/Kotlin** on top of PostgreSQL and Kubernetes”
+  - “In this exercise I implement the same **architectural principles** with **Node.js + Express + React + PostgreSQL**”
+- When you explain your design, focus on **concepts that transfer across stacks**:
+  - Modular domains, clear layers (routes/controllers/services/repositories)
+  - Strong typing and contracts
+  - Testing strategy and observability
+  - Security and privacy for healthcare data
+
+---
+
+## 🧱 High-Level Architecture (Interview Version)
+
+### 1. Monolith, but Well-Structured
+
+- Think **“modular monolith”**:
+  - One **Express application** for the backend
+  - One **React + TS app** for the frontend
+  - One **PostgreSQL database**
+- Clear **domain modules** instead of microservices:
+  - Examples: `patients`, `practitioners`, `appointments`, `auth`, `teleconsultations`
+- Aim for **simple boundaries**, not over-engineered patterns:
+  - Separate **HTTP layer / business logic / DB access**
+  - Prefer **composition** over deep inheritance.
+
+### 2. Typical Folder Structures
+
+- **Backend (Node.js + Express + TypeScript)**
+
+  - `src/`
+    - `routes/` → Express routers (HTTP endpoints only)
+    - `controllers/` → map requests to services, handle status codes
+    - `services/` → business logic (scheduling, validation, domain rules)
+    - `repositories/` → DB access (SQL queries / query builder / ORM)
+    - `models/` or `entities/` → TypeScript types/interfaces for domain objects
+    - `middlewares/` → auth, validation, error handling, logging
+    - `config/` → DB connection, environment config
+    - `tests/` → unit + integration (Jest)
+
+- **Frontend (React 18 + TypeScript)**
+  - `src/`
+    - `components/`
+      - `shared/` → design system-like components (buttons, modals, inputs)
+      - `features/` → domain UI (appointment list, booking form)
+      - `layouts/`
+    - `pages/` → route-level components
+    - `hooks/` → custom React hooks (data fetching, form logic)
+    - `services/` → API clients (fetch/axios, typed)
+    - `types/` → shared TypeScript types / DTOs
+    - `utils/` → formatters, helpers
+    - `styles/` → CSS/SCSS or CSS-in-JS
+    - `tests/` → component tests, hooks tests
+
+---
+
+## 🧠 Core Doctolib Principles (Tech-Agnostic)
+
+### 1. Simple but Not Simplistic
+
+- Prefer **straightforward solutions** that you can explain in 2 minutes.
+- Avoid premature microservices, fancy patterns, or over-abstraction.
+- Always ask: _“Will this still be understandable in 6 months by another engineer?”_
+
+### 2. You Build It, You Run It (Ownership)
+
+- When designing a feature, think about:
+  - **How you’d monitor it** (logs, metrics)
+  - **How you’d debug it** (structured logs, clear errors)
+  - **How you’d test it** (unit, integration, end-to-end)
+- Even in an interview, mention:
+  - “I’d add logs here to track X”
+  - “I’d add a test case for Y”.
+
+### 3. Healthcare & Privacy Awareness
+
+- Data is **sensitive** (patients, doctors, appointments).
+- Principles to keep in mind:
+  - **Data minimization**: only store what you need.
+  - **Least privilege**: patients vs practitioners vs admins.
+  - **No secrets in code**: use environment variables (even in small demos).
+  - **Auditability**: be able to understand what happened when something goes wrong.
+
+---
+
+## 🗄️ Backend (Node.js + Express + PostgreSQL)
+
+### 1. How to Think About the Backend
+
+- Equivalent of the Rails monolith, but in **Express + TypeScript**:
+  - **Routes**: define URL + HTTP verb
+  - **Controllers**: parse input, call services, choose status codes
+  - **Services**: domain logic (e.g. scheduling, availability checks)
+  - **Repositories**: encapsulate SQL queries
+  - **Models/Types**: TypeScript interfaces/types for domain entities
+
+### 2. PostgreSQL Usage Patterns
+
+- Use **clear schemas** and **foreign keys**:
+  - Example tables: `patients`, `practitioners`, `appointments`
+  - Foreign key examples:
+    - `appointments.patient_id → patients.id`
+    - `appointments.practitioner_id → practitioners.id`
+- Index where it matters:
+  - Typical indexes on `(practitioner_id, date_time)` for appointment searches.
+- Favor:
+  - **Parameterized queries** to avoid SQL injection.
+  - **Small SELECTs** (only required columns).
+  - **JOINs** over many small queries (avoid N+1).
+
+### 3. Structure of an API Endpoint (Mental Model)
+
+When you design an endpoint, always think in this order:
+
+1. **Route definition**
+   - Path, method, URL parameters vs query parameters vs body.
+2. **Validation**
+   - Validate body/query/params (with a library or manual checks).
+3. **Authorization**
+   - Who is allowed to perform this action (patient, doctor, admin)?
+4. **Business logic**
+   - Call a service function to implement the feature (e.g. schedule appointment).
+5. **Persistence**
+   - Use repository to read/write from PostgreSQL.
+6. **Response**
+   - Successful response shape (status code + JSON body).
+7. **Error handling**
+   - Expected domain errors vs unexpected server errors.
+
+### 4. Testing the Backend (Jest)
+
+- **Unit tests**:
+  - Services tested in isolation (mock repositories).
+  - Repositories tested with a test DB (or in-memory approach).
+- **Integration tests**:
+  - Use Supertest + Jest to hit real Express routes.
+  - Use a test DB schema with fixtures or seed data.
+- Focus on:
+  - Edge cases (invalid data, conflicts, missing resources).
+  - Correct status codes (400, 401, 403, 404, 409, 500, etc.).
+
+---
+
+## 🎨 Frontend (React 18 + TypeScript)
+
+### 1. Component Design Philosophy
+
+- Use **component-driven design**:
+  - Small reusable components from a “design system spirit” (like Oxygen).
+  - Domain-specific components that compose the shared ones.
+- Always think:
+  - **Accessibility** (labels, roles, keyboard navigation).
+  - **Clear error messages** (what went wrong, what to do).
+  - **Loading and empty states** (not just the “happy path”).
+
+### 2. Data Flow & API Calls
+
+- API client layer in `services/`:
+  - Strongly typed functions for each endpoint.
+  - Centralized error handling and base URL configuration.
+- Components should:
+  - Use **custom hooks** for data fetching (e.g. `useAppointments`).
+  - Keep UI logic in components, data logic in hooks/services.
+  - Handle loading / error / success states explicitly.
+
+### 3. TypeScript Practices
+
+- Define **types for all important entities**:
+  - `Patient`, `Practitioner`, `Appointment`, `UserRole`, `ApiError`, etc.
+- Avoid `any`:
+  - Use discriminated unions for statuses and roles.
+  - Use utility types (`Pick`, `Omit`, `Partial`, etc.) when needed.
+
+### 4. Testing the Frontend
+
+- Use **React Testing Library + Jest**:
+  - Test components from the user perspective (text, roles, actions).
+  - Mock API calls where needed.
+- Cover:
+  - Happy paths (data loads correctly).
+  - Error states (server error, validation error).
+  - Edge UI cases (empty list, disabled buttons).
+
+---
+
+## ⚙️ CI/CD & Quality Mindset (Simplified)
+
+Even if you don’t implement full CI/CD in the interview, think like this:
+
+- **Before merging / finishing a task mentally**:
+  - Lint passes (ESLint, TypeScript).
+  - Tests pass (Jest).
+  - No obvious performance issues (avoid massive loops on each render).
+- **PR mindset** (even if you just write code locally):
+  - Small, focused changes.
+  - Clear description of what you did and why.
+  - Mention tests you would add or already wrote.
+
+---
+
+## 🔐 Security & Privacy Basics (for the Interview)
+
+- **Never trust input**:
+  - Validate all incoming data (backend especially).
+  - Sanitize or validate user-controlled parameters.
+- **Avoid leaking sensitive data**:
+  - Do not return internal IDs or details that are not needed.
+  - Design error messages that don’t leak implementation details.
+- **Authentication & Authorization**:
+  - Even if simplified, always mention:
+    - “This route should check that the user is authenticated.”
+    - “A patient should only access their own appointments.”
+
+---
+
+## 📊 Testing Strategy (Mini Doctolib Pyramid)
+
+Think in terms of a **testing pyramid**, but adapted to the interview scale:
+
+1. **Unit tests** (most):
+   - Pure functions, services, simple components.
+2. **Integration tests**:
+   - API endpoints with Express + test DB.
+   - React components + API mocks end-to-end-like.
+3. **Manual/E2E checks** (few, but important):
+   - Launch the app.
+   - Walk through key user flows (e.g. book an appointment).
+
+Always be able to answer:
+
+- “How would you test this?”
+- “What are the most important edge cases here?”
+
+---
+
+## 🧭 How to Use This Context During the Interview
+
+- When designing a feature, **place it** in this mental architecture:
+  - Which **Express route**?
+  - Which **service**?
+  - Which **DB tables / queries**?
+  - Which **React components / hooks**?
+- When explaining a solution, **connect to Doctolib principles**:
+  - Simplicity, testability, observability, privacy, accessibility.
+- When in doubt, **prefer clarity over cleverness**.
+
+---
+
+## ✅ Quick Checklist Before Finalizing a Solution
+
+- **Architecture**
+  - Is the responsibility split between route → controller → service → repository?
+  - On the frontend, is logic split between component, hook, and service?
+- **Data & DB**
+  - Are entities and relationships clear?
+  - Is there any obvious query or N+1 problem?
+- **Types & Contracts**
+  - Are TypeScript types clear on both backend and frontend?
+  - Is the API contract (request/response shape) explicit?
+- **Testing**
+  - Can you name at least 3 tests you’d write?
+  - Have you thought about error and edge states?
+- **Healthcare Context**
+  - Are you careful with sensitive data and permissions?
+
+If most answers are “yes”, you’re thinking very close to how Doctolib engineers structure and reason about their features—just with **Node.js + React + PostgreSQL** instead of Rails.
